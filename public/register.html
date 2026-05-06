@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #F5F0E8;
+      --ink: #1A1612;
+      --gold: #C9A84C;
+      --gold-light: #E8C97A;
+      --muted: #8A7F74;
+      --card-bg: #FDFAF4;
+      --error: #C0392B;
+      --success: #2E7D52;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--cream);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 150px 150px;
+      z-index: 100;
+    }
+
+    /* LEFT PANEL — form */
+    .panel-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 48px;
+      animation: slideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .form-wrap {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 48px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--gold); }
+    .back-link svg { transition: transform 0.2s; }
+    .back-link:hover svg { transform: translateX(-3px); }
+
+    .form-header { margin-bottom: 44px; }
+
+    .form-header .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .form-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 42px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px solid rgba(26,22,18,0.18);
+      padding: 12px 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input::placeholder { color: rgba(138,127,116,0.5); }
+    input:focus { border-bottom-color: var(--gold); }
+
+    .input-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 1.5px;
+      width: 0;
+      background: var(--gold);
+      transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    input:focus ~ .input-line { width: 100%; }
+
+    /* Password strength */
+    .strength-bar {
+      display: flex;
+      gap: 4px;
+      margin-top: 10px;
+      height: 3px;
+    }
+
+    .strength-bar span {
+      flex: 1;
+      border-radius: 2px;
+      background: rgba(26,22,18,0.1);
+      transition: background 0.3s ease;
+    }
+
+    .strength-bar.weak span:nth-child(1)    { background: #C0392B; }
+    .strength-bar.fair span:nth-child(-n+2) { background: var(--gold-light); }
+    .strength-bar.good span:nth-child(-n+3) { background: var(--gold); }
+    .strength-bar.strong span               { background: var(--success); }
+
+    .strength-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 0.05em;
+      min-height: 16px;
+      transition: color 0.3s;
+    }
+
+    .terms {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 4px;
+      margin-bottom: 28px;
+    }
+
+    .terms input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      border: 1.5px solid rgba(26,22,18,0.3);
+      border-bottom: 1.5px solid rgba(26,22,18,0.3);
+      accent-color: var(--gold);
+      cursor: pointer;
+      margin-top: 2px;
+      padding: 0;
+    }
+
+    .terms label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0;
+      text-transform: none;
+      font-weight: 400;
+      line-height: 1.6;
+      cursor: pointer;
+    }
+
+    .terms label a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(26,22,18,0.2);
+      transition: all 0.2s;
+    }
+
+    .terms label a:hover { color: var(--gold); border-color: var(--gold); }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      padding: 17px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: translateX(-100%);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .btn-submit:hover::before { transform: translateX(0); }
+    .btn-submit span { position: relative; z-index: 1; transition: color 0.35s; }
+    .btn-submit:hover { box-shadow: 0 6px 30px rgba(201,168,76,0.3); }
+    .btn-submit:hover span { color: var(--ink); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-submit:disabled::before { display: none; }
+
+    .login-link {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 28px;
+    }
+
+    .login-link a {
+      color: var(--ink);
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(26,22,18,0.2);
+      padding-bottom: 1px;
+      transition: all 0.2s;
+    }
+
+    .login-link a:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* RIGHT PANEL — decorative */
+    .panel-right {
+      background: var(--ink);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-right::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      left: -80px;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+    }
+
+    .panel-right::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      right: -80px;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.09) 0%, transparent 70%);
+    }
+
+    .panel-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      z-index: 1;
+      text-align: right;
+    }
+
+    .panel-features {
+      z-index: 1;
+      list-style: none;
+    }
+
+    .panel-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(245,240,232,0.07);
+    }
+
+    .panel-features li:last-child { border-bottom: none; }
+
+    .feat-icon {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 15px;
+      margin-top: 2px;
+    }
+
+    .feat-text strong {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+
+    .feat-text span {
+      font-size: 13px;
+      color: rgba(245,240,232,0.45);
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    .panel-bottom {
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); opacity: 0.4; }
+    .dot.active { opacity: 1; width: 20px; border-radius: 3px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 28px;
+      right: 28px;
+      padding: 16px 24px;
+      border-radius: 3px;
+      font-size: 13px;
+      z-index: 999;
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--ink); color: var(--cream); border-left: 3px solid var(--gold); }
+    .toast.error   { background: #2D1B1B; color: #F5D5D0; border-left: 3px solid var(--error); }
+
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      .panel-right { display: none; }
+      .panel-left { padding: 40px 32px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain"></div>
+
+  <!-- LEFT — form -->
+  <div class="panel-left">
+    <div class="form-wrap">
+      <a href="/index.html" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Voltar
+      </a>
+
+      <div class="form-header">
+        <span class="eyebrow">Novo por aqui?</span>
+        <h1>Criar conta</h1>
+      </div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label for="name">Nome completo</label>
+          <input type="text" id="name" placeholder="Seu nome" required autocomplete="name" />
+          <div class="input-line"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Endereço de e-mail</label>
+          <input type="email" id="email" placeholder="seu@email.com" required autocomplete="email" />
+          <div class="input-line"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <input type="password" id="password" placeholder="Mínimo 8 caracteres" required autocomplete="new-password" />
+          <div class="input-line"></div>
+          <div class="strength-bar" id="strengthBar">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <p class="strength-label" id="strengthLabel"></p>
+        </div>
+
+        <div class="terms">
+          <input type="checkbox" id="terms" />
+          <label for="terms">Concordo com os <a href="#">Termos de Uso</a> e a <a href="#">Política de Privacidade</a></label>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span>Criar minha conta</span>
+        </button>
+      </form>
+
+      <p class="login-link">Já tem uma conta? <a href="/login.html">Entrar</a></p>
+    </div>
+  </div>
+
+  <!-- RIGHT — decorative -->
+  <div class="panel-right">
+    <div class="panel-logo">Auth&nbsp;System</div>
+
+    <ul class="panel-features">
+      <li>
+        <div class="feat-icon">🔒</div>
+        <div class="feat-text">
+          <strong>Segurança de ponta</strong>
+          <span>Seus dados são criptografados com padrões modernos.</span>
+        </div>
+      </li>
+      <li>
+        <div class="feat-icon">⚡</div>
+        <div class="feat-text">
+          <strong>Acesso instantâneo</strong>
+          <span>Autenticação rápida e sem fricção em qualquer dispositivo.</span>
+        </div>
+      </li>
+      <li>
+        <div class="feat-icon">🛡️</div>
+        <div class="feat-text">
+          <strong>Privacidade garantida</strong>
+          <span>Nunca compartilhamos suas informações com terceiros.</span>
+        </div>
+      </li>
+    </ul>
+
+    <div class="panel-bottom">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot active"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const form = document.getElementById("registerForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const toast = document.getElementById("toast");
+    const passwordInput = document.getElementById("password");
+    const strengthBar = document.getElementById("strengthBar");
+    const strengthLabel = document.getElementById("strengthLabel");
+
+    function showToast(message, type = 'success') {
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    function checkStrength(pass) {
+      let score = 0;
+      if (pass.length >= 8) score++;
+      if (/[A-Z]/.test(pass)) score++;
+      if (/[0-9]/.test(pass)) score++;
+      if (/[^A-Za-z0-9]/.test(pass)) score++;
+      return score;
+    }
+
+    passwordInput.addEventListener("input", () => {
+      const val = passwordInput.value;
+      if (!val) {
+        strengthBar.className = 'strength-bar';
+        strengthLabel.textContent = '';
+        return;
+      }
+      const score = checkStrength(val);
+      const levels = ['', 'weak', 'fair', 'good', 'strong'];
+      const labels = ['', 'Fraca', 'Razoável', 'Boa', 'Forte'];
+      strengthBar.className = `strength-bar ${levels[score]}`;
+      strengthLabel.textContent = labels[score] || '';
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name     = document.getElementById("name").value.trim();
+      const email    = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const agreed   = document.getElementById("terms").checked;
+
+      if (!name || !email || !password) {
+        showToast("Preencha todos os campos.", "error"); return;
+      }
+      if (!agreed) {
+        showToast("Aceite os Termos de Uso para continuar.", "error"); return;
+      }
+      if (checkStrength(password) < 2) {
+        showToast("Escolha uma senha mais forte.", "error"); return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').textContent = 'Criando conta…';
+
+      try {
+        const res = await fetch("/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          showToast("Conta criada com sucesso! Bem-vindo!", "success");
+          form.reset();
+          strengthBar.className = 'strength-bar';
+          strengthLabel.textContent = '';
+        } else {
+          showToast(data.message || "Erro ao criar conta.", "error");
+        }
+      } catch (err) {
+        showToast("Erro de conexão. Tente novamente.", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('span').textContent = 'Criar minha conta';
+      }
+    });
+  </script>
+</body>
+</html>
